@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0C1017">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png">
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EXPLONORTE Chile SpA</title>
@@ -646,6 +653,21 @@ async function expSupExcel(){if(!ST.curD||!ST.sup.dias[ST.curD]){toast('No hay d
 async function expSupConPlantilla(dia,dg){var wb=new ExcelJS.Workbook();await wb.xlsx.load(TPL_SUP);var ws=wb.worksheets[0];if(!ws)throw new Error('No se encontro hoja');var supMap={'C6':fmtF(ST.curD),'F6':dia.hor||'','K6':dg.nom||'','C7':dg.rut||'','F7':dg.lug||'','E8':dg.cod||'PR-SSO-08','O6':String(dg.acum||11000),'K7':String(dia.filas.length)};Object.keys(supMap).forEach(function(ref){ws.getCell(ref).value=supMap[ref];});var startRow=11;for(var i=0;i<dia.filas.length;i++){var f=dia.filas[i];var r=startRow+i;var vals=[i+1,f.nom||'',f.nR||'',f.rut||'',f.maq||'',f.pat||'',f.hM||'',f.comb||'',f.hI||'',f.hF||'',f.hH||'',f.prodR||'',f.actR||'',f.vuel||0,(f.vuel||0)*M3_POR_VUELTA];for(var c=0;c<vals.length;c++){ws.getCell(c+1,r).value=vals[c];}}var buf=await wb.xlsx.writeBuffer();var blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='Supervisor_'+fmtF(ST.curD)+'.xlsx';a.click();URL.revokeObjectURL(url);toast('Excel Supervisor con plantilla descargado','ok');}
 
 function expSupPDF(){if(!ST.curD||!ST.sup.dias[ST.curD]){toast('No hay datos del supervisor','er');return;}var dia=ST.sup.dias[ST.curD];var dg=ST.sup.dg;var rows=dia.filas;var jsPDF=window.jspdf.jsPDF;var doc=new jsPDF('l','mm','a4');doc.setFontSize(16);doc.setTextColor(31,41,55);doc.text('EXPLONORTE Chile SpA - Planilla Resumen de Supervision Diaria',14,15);doc.setDrawColor(212,148,10);doc.setLineWidth(0.6);doc.line(14,18,283,18);var y=24;doc.setFontSize(9);doc.setTextColor(107,124,153);var dgText='Fecha: '+fmtF(ST.curD)+' | Hora: '+(dia.hor||'')+' | Supervisor: '+(dg.nom||'')+' | RUT: '+(dg.rut||'')+' | Lugar: '+(dg.lug||'')+' | Codigo: '+(dg.cod||'');doc.text(dgText,14,y);y+=8;var headers=['N','Nombre','N\u00b0Rep','RUT','Maquinaria','Patente','H.Maq','Comb','H.Ini','H.Fin','H.H','Prod.','Actividad','Vuel','m3'];var colW=[8,30,12,20,28,16,12,12,12,12,10,20,36,10,10];doc.autoTable({head:[headers],body:rows.map(function(f,i){return[i+1,f.nom||'',f.nR||'',f.rut||'',f.maq||'',f.pat||'',f.hM||'',f.comb||'',f.hI||'',f.hF||'',f.hH||'',f.prodR||'',f.actR||'',f.vuel||0,(f.vuel||0)*M3_POR_VUELTA];}),startY:y,styles:{fontSize:6,cellPadding:1.5,font:'helvetica'},headStyles:{fillColor:[26,37,64],textColor:[212,148,10],fontSize:6},columnStyles:colW.map(function(w){return{cellWidth:w};}),margin:{left:14,right:14}});y=doc.lastAutoTable.finalY+8;doc.setFontSize(8);doc.setTextColor(107,124,153);var tHH=0,tHM=0,tCB=0,tM3=0,tVT=0;for(var j=0;j<rows.length;j++){tHH+=rows[j].hHD||0;tHM+=rows[j].hMD||0;tCB+=rows[j].comb||0;tVT+=rows[j].vuel||0;tM3+=(rows[j].vuel||0)*M3_POR_VUELTA;}doc.text('Personal: '+rows.length+' | H.Hombre: '+tHH.toFixed(2)+' | H.Maquina: '+tHM.toFixed(1)+' | Combustible: '+tCB.toFixed(0)+' | Vueltas: '+tVT+' | m3: '+tM3.toFixed(0),14,y);doc.save('Supervisor_'+fmtF(ST.curD)+'.pdf');toast('PDF Supervisor descargado','ok');}
+
+
+
+
+/* SERVICE WORKER - PWA */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(function(reg) {
+    console.log('Service Worker registrado');
+  }).catch(function(err) {
+    console.log('Error SW:', err);
+  });
+}
+
+
+
 </script>
 </body>
 </html>
